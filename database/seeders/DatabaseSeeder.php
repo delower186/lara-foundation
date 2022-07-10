@@ -25,9 +25,10 @@ class DatabaseSeeder extends Seeder
         }
 
         foreach(User::all() as $user){
-            foreach(Role::all() as $role){
-                $user->roles()->attach($role->id);
-            }
+            // foreach(Role::all() as $role){
+            //     $user->roles()->attach($role->id);
+            // }
+            $user->roles()->attach(rand(1,3));
         }
 
         // \App\Models\User::factory()->create([
