@@ -25,4 +25,20 @@ class Role extends Model
     {
         return $this->belongsToMany(User::class)->withTimestamps();
     }
+
+    public function user($role)
+    {
+        foreach($role->users as $user)
+        {
+            return $user;
+        }
+    }
+
+    public function userId($role)
+    {
+        foreach($role->users as $user)
+        {
+            return $user->id;
+        }
+    }
 }

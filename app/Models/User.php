@@ -6,11 +6,12 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
     use HasFactory;
@@ -65,5 +66,35 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class)->withTimestamps();
+    }
+
+    public function role($user)
+    {
+        foreach($user->roles as $role)
+        {
+            return $role->name;
+        }
+    }
+
+    public function roleId($user)
+    {
+        foreach($user->roles as $role)
+        {
+            return $role->id;
+        }
+    }
+
+    public function hasRole($roleId){
+
+        $roleIds = explode("|",$roleId);
+
+        if(in_array(Auth::user()->roles[0]->id,$roleIds))
+        {
+            return true;
+        }else
+        {
+            return false;
+        }
+
     }
 }

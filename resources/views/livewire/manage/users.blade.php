@@ -7,9 +7,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 rounded-lg shadow-sm">
-            <div class="mb-2 float-right">
-                <x-jet-button wire:click="addOrEdit()">{{ __('Add New') }}</x-jet-button>
-            </div>
             <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg">
                 <div class="w-full overflow-x-auto">
                   <table class="w-full">
@@ -19,8 +16,8 @@
                         <th class="px-4 py-3 border">Name</th>
                         <th class="px-4 py-3 border">Email</th>
                         <th class="px-4 py-3 border">Role</th>
-                        <th class="px-4 py-3 border">Activation</th>
-                        <th class="px-4 py-3 border">Created_at</th>
+                        <th class="px-4 py-3 border">Active</th>
+                        <th class="px-4 py-3 border">Registered</th>
                         <th class="px-4 py-3"></th>
                       </tr>
                     </thead>
@@ -32,7 +29,7 @@
                                     <td class="px-4 py-3 border">
                                         <div class="flex items-center text-sm">
                                             <div class="relative w-8 h-8 mr-3 rounded-full md:block">
-                                                <img class="object-cover w-full h-full rounded-full" src="https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260" alt="" loading="lazy" />
+                                                <img class="object-cover w-full h-full rounded-full" src="{{ $user->profile_photo_url }}" alt="" loading="lazy" />
                                                 <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
                                             </div>
                                             <div>
@@ -43,13 +40,7 @@
                                     </td>
                                     <td class="px-4 py-3 text-ms font-semibold border"> {{ $user->email }} </td>
                                     <td class="px-4 py-3 text-sm border">
-                                        @if ($user->roles->count() > 0 )
-
-                                            @foreach ($user->roles as $role)
-                                                {{ $role->name }}
-                                            @endforeach
-
-                                        @endif
+                                        {{ $user->role($user) }}
                                     </td>
                                     <td class="px-4 py-3 text-xs border">
                                         @if ($user->active == true)
@@ -60,13 +51,17 @@
                                     </td>
                                     <td class="px-4 py-3 text-sm border">{{ $user->created_at }}</td>
                                     <td class="px-4 py-3 text-sm border">
-                                        <x-jet-secondary-button wire:click="addOrEdit({{ $user->id }})">Edit</x-jet-secondary-button>
+                                        <x-jet-secondary-button wire:click="edit({{ $user->id }})">Edit</x-jet-secondary-button>
                                         <x-jet-danger-button wire:click="confirmingUserDeletion({{ $user->id }})">Del</x-jet-danger-button>
                                     </td>
                                 </tr>
                             @endforeach
                         @else
-
+                            <tr class="text-gray-700">
+                                <td class="px-4 py-3 text-sm border">
+                                    <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-green-100 rounded-sm"> Nothing Found! </span>
+                                </td>
+                            </tr>
                         @endif
                     </tbody>
                     <thead>
@@ -75,12 +70,15 @@
                             <th class="px-4 py-3 border">Name</th>
                             <th class="px-4 py-3 border">Email</th>
                             <th class="px-4 py-3 border">Role</th>
-                            <th class="px-4 py-3 border">Activation</th>
-                            <th class="px-4 py-3 border">Created_at</th>
+                            <th class="px-4 py-3 border">Active</th>
+                            <th class="px-4 py-3 border">Registered</th>
                             <th class="px-4 py-3"></th>
                         </tr>
                       </thead>
                   </table>
+                  <div class="mb-2 mt-2 ml-2 mr-2">
+                    {{ $users->links() }}
+                  </div>
                 </div>
             </div>
         </div>
@@ -88,21 +86,11 @@
     {{-- Delete User Confirmation Modal --}}
     <x-jet-dialog-modal wire:model="confirmingUserDeletion">
         <x-slot name="title">
-            {{ __('Delete Account') }}
+            {{ __('Delete User') }}
         </x-slot>
 
         <x-slot name="content">
-            {{ __('Are you sure you want to delete your account? Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
-
-            <div class="mt-4" x-data="{}" x-on:confirming-delete-user.window="setTimeout(() => $refs.password.focus(), 250)">
-                <x-jet-input type="password" class="mt-1 block w-3/4"
-                            placeholder="{{ __('Password') }}"
-                            x-ref="password"
-                            wire:model.defer="password"
-                            wire:keydown.enter="deleteUser" />
-
-                <x-jet-input-error for="password" class="mt-2" />
-            </div>
+            {{ __('Are you sure you want to delete this user? Once user is deleted, all of its resources and data will be permanently deleted.') }}
         </x-slot>
 
         <x-slot name="footer">
@@ -110,45 +98,48 @@
                 {{ __('Cancel') }}
             </x-jet-secondary-button>
 
-            <x-jet-danger-button class="ml-3" wire:click="deleteUser" wire:loading.attr="disabled">
-                {{ __('Delete Account') }}
+            <x-jet-danger-button class="ml-3" wire:click="deleteUser({{ $this->userId }})" wire:loading.attr="disabled">
+                {{ __('Delete User') }}
             </x-jet-danger-button>
         </x-slot>
     </x-jet-dialog-modal>
-    {{-- Add or Edit User Modal --}}
-    <x-jet-dialog-modal wire:model="addOrEdit">
+    {{-- Edit User Modal --}}
+    <x-jet-dialog-modal wire:model="edit">
         <x-slot name="title">
-            {{ __('Delete Account') }}
+            {{ __('Update User') }}
         </x-slot>
 
         <x-slot name="content">
             <div class="col-span-6 sm:col-span-4">
-                <x-jet-label for="current_password" value="{{ __('Current Password') }}" />
-                <x-jet-input id="current_password" type="password" class="mt-1 block w-full" wire:model.defer="state.current_password" autocomplete="current-password" />
-                <x-jet-input-error for="current_password" class="mt-2" />
+                <x-jet-label for="role" value="{{ __('Role') }}" />
+                <select id="role" class="mt-1 block w-full rounded-md" wire:model.defer="user.role">
+                    <option value="">Select Role</option>
+                    @if ($roles->count() > 0)
+                        @foreach ($roles as $role)
+                            <option value="{{ $role->id }}">{{ $role->name }}</option>
+                        @endforeach
+                    @else
+                        <option value=null>No Roles Found!</option>
+                    @endif
+                </select>
+                <x-jet-input-error for="user.role" class="mt-2"/>
             </div>
-
-            <div class="col-span-6 sm:col-span-4">
-                <x-jet-label for="password" value="{{ __('New Password') }}" />
-                <x-jet-input id="password" type="password" class="mt-1 block w-full" wire:model.defer="state.password" autocomplete="new-password" />
-                <x-jet-input-error for="password" class="mt-2" />
-            </div>
-
-            <div class="col-span-6 sm:col-span-4">
-                <x-jet-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
-                <x-jet-input id="password_confirmation" type="password" class="mt-1 block w-full" wire:model.defer="state.password_confirmation" autocomplete="new-password" />
-                <x-jet-input-error for="password_confirmation" class="mt-2" />
+            <div class="block mt-4">
+                <label for="activate" class="flex items-center">
+                    <x-jet-checkbox id="activate" wire:model.defer="user.activate" />
+                    <span class="ml-2 text-sm text-gray-600">{{ __('Activate User?') }}</span>
+                </label>
             </div>
         </x-slot>
 
         <x-slot name="footer">
-            <x-jet-secondary-button wire:click="$toggle('addOrEdit')" wire:loading.attr="disabled">
+            <x-jet-secondary-button wire:click="$toggle('edit')" wire:loading.attr="disabled">
                 {{ __('Cancel') }}
             </x-jet-secondary-button>
 
-            <x-jet-danger-button class="ml-3" wire:click="deleteUser" wire:loading.attr="disabled">
-                {{ __('Delete Account') }}
-            </x-jet-danger-button>
+            <x-jet-button class="ml-3" wire:click="update({{ $this->userId }})" wire:loading.attr="disabled">
+                {{ __('Update') }}
+            </x-jet-button>
         </x-slot>
     </x-jet-dialog-modal>
 </div>
