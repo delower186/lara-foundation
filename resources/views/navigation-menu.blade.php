@@ -21,6 +21,11 @@
                         {{ __('Users') }}
                     </x-jet-nav-link>
                 </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-jet-nav-link href="{{ route('roles') }}" :active="request()->routeIs('roles')">
+                        {{ __('Roles') }}
+                    </x-jet-nav-link>
+                </div>
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ml-6">
@@ -147,11 +152,19 @@
             </x-jet-responsive-nav-link>
         </div>
 
-        <div class="pt-2 pb-3 space-y-1">
-            <x-jet-responsive-nav-link href="{{ route('users') }}" :active="request()->routeIs('users')">
-                {{ __('Users') }}
-            </x-jet-responsive-nav-link>
-        </div>
+        @can('admin','editor')
+            <div class="pt-2 pb-3 space-y-1">
+                <x-jet-responsive-nav-link href="{{ route('users') }}" :active="request()->routeIs('users')">
+                    {{ __('Users') }}
+                </x-jet-responsive-nav-link>
+            </div>
+
+            <div class="pt-2 pb-3 space-y-1">
+                <x-jet-responsive-nav-link href="{{ route('roles') }}" :active="request()->routeIs('roles')">
+                    {{ __('Roles') }}
+                </x-jet-responsive-nav-link>
+            </div>
+        @endcan
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="flex items-center px-4">

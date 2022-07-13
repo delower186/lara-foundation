@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
@@ -27,24 +30,26 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        $roles = Role::all();
 
-        foreach($roles[0] as $role)
-        {
-            Gate::define(1, function (User $user,$role) {
+        //Enable Session in AuthServiceProvider
+        Event::listen(
+            \Illuminate\Auth\Events\Authenticated::class,
+            function () {
+              // your code goes here …
+                $role_ids = DB::select('select `role_id` from `role_user` where `user_id` = ?', [Auth::user()->id]);
+                $role = Role::find($role_ids[0]->role_id);
+                //dd($role->name);
 
-                dd($role[0]);
+                Gate::define($role->name, function (User $user) {
 
-                return $user->hasRole("$role->id|");
-            });
+                    $role_ids = DB::select('select `role_id` from `role_user` where `user_id` = ?', [Auth::user()->id]);
+                    $role = Role::find($role_ids[0]->role_id);
 
-        }
+                    return $user->role($user) == $role->name;
+                });
 
-    //     Gate::before(function (User $user, $ability) {
-    //         Gate::define($ability, function (User $user) use ($ability) {
-    //             return $user->hasPermission($ability);
-    //         });
-    //   });
+            }
+        );
 
     }
 }

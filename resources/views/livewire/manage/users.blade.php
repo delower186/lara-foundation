@@ -52,7 +52,9 @@
                                     <td class="px-4 py-3 text-sm border">{{ $user->created_at }}</td>
                                     <td class="px-4 py-3 text-sm border">
                                         <x-jet-secondary-button wire:click="edit({{ $user->id }})">Edit</x-jet-secondary-button>
-                                        <x-jet-danger-button wire:click="confirmingUserDeletion({{ $user->id }})">Del</x-jet-danger-button>
+                                        @can('admin')
+                                            <x-jet-danger-button wire:click="confirmingUserDeletion({{ $user->id }})">Del</x-jet-danger-button>
+                                        @endcan
                                     </td>
                                 </tr>
                             @endforeach

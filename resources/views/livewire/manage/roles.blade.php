@@ -7,9 +7,11 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 rounded-lg shadow-sm">
-            <div class="mb-2 float-right">
-                <x-jet-button wire:click="addOrEdit()">{{ __('Add New') }}</x-jet-button>
-            </div>
+            @can('admin')
+                <div class="mb-2 float-right">
+                    <x-jet-button wire:click="addOrEdit()">{{ __('Add New') }}</x-jet-button>
+                </div>
+            @endcan
             <div class="w-full mb-8 overflow-hidden rounded-lg shadow-lg">
                 <div class="w-full overflow-x-auto">
                   <table class="w-full">
@@ -19,7 +21,9 @@
                         <th class="px-4 py-3 border">Name</th>
                         <th class="px-4 py-3 border">Users</th>
                         <th class="px-4 py-3 border">Created</th>
-                        <th class="px-4 py-3"></th>
+                        @can('admin')
+                            <th class="px-4 py-3"></th>
+                        @endcan
                       </tr>
                     </thead>
                     <tbody class="bg-white">
@@ -30,10 +34,12 @@
                                     <td class="px-4 py-3 text-sm border">{{ $role->name }}</td>
                                     <td class="px-4 py-3 text-sm border"><span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-sm"> {{ $role->users->count() }} </span></td>
                                     <td class="px-4 py-3 text-sm border">{{ $role->created_at }}</td>
-                                    <td class="px-4 py-3 text-sm border">
-                                        <x-jet-secondary-button wire:click="addOrEdit({{ $role->id }})">Edit</x-jet-secondary-button>
-                                        <x-jet-danger-button wire:click="confirmingRoleDeletion({{ $role->id }})">Del</x-jet-danger-button>
-                                    </td>
+                                    @can('admin')
+                                        <td class="px-4 py-3 text-sm border">
+                                            <x-jet-secondary-button wire:click="addOrEdit({{ $role->id }})">Edit</x-jet-secondary-button>
+                                            <x-jet-danger-button wire:click="confirmingRoleDeletion({{ $role->id }})">Del</x-jet-danger-button>
+                                        </td>
+                                    @endcan
                                 </tr>
                             @endforeach
                         @else
@@ -50,7 +56,9 @@
                             <th class="px-4 py-3 border">Name</th>
                             <th class="px-4 py-3 border">Users</th>
                             <th class="px-4 py-3 border">Created</th>
-                            <th class="px-4 py-3"></th>
+                            @can('admin')
+                                <th class="px-4 py-3"></th>
+                            @endcan
                         </tr>
                       </thead>
                   </table>

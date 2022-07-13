@@ -34,12 +34,6 @@ Route::middleware(['auth:sanctum',config('jetstream.auth_session'),'verified',])
         Route::get('/dashboard/users',Users::class)->name('users');
         Route::get('/dashboard/roles',Roles::class)->name('roles');
     });
-
-    //Editor routes
-    // Route::middleware(['role:1'])->group(function(){
-    //     Route::get('/dashboard/users',Users::class)->name('users');
-    //     Route::get('/dashboard/roles',Roles::class)->name('roles');
-    // });
 });
 
 //Login, Register & email verification routes
